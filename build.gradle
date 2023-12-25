@@ -1,9 +1,5 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version "7.1.2"
-}
-shadowJar {
-    from sourceSets.main.resources
 }
 
 group = project.maven_group
@@ -19,12 +15,15 @@ repositories {
     maven { url "https://www.jetbrains.com/intellij-repository/releases" }
 }
 
-dependencies {
-    implementation 'com.github.DuncanRuns:Julti:v1.0.2'
-    implementation 'com.github.Vatuu:discord-rpc:1.6.2'
-    implementation 'com.google.code.gson:gson:2.10.1'
+configurations {
+    provided
+    implementation.extendsFrom(provided)
 }
 
+dependencies {
+    implementation 'com.github.DuncanRuns:Julti:v1.0.2'
+    provided 'com.github.Vatuu:discord-rpc:1.6.2'
+}
 
 processResources {
     inputs.property "version", project.version
@@ -32,4 +31,8 @@ processResources {
     filesMatching("julti.plugin.json") {
         expand "version": project.version
     }
+}
+
+jar {
+    from configurations.provided.asFileTree.files.collect { zipTree(it) }
 }

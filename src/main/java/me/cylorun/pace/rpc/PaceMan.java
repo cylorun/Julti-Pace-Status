@@ -1,4 +1,4 @@
-package me.cylorun.pace;
+package me.cylorun.pace.rpc;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -45,16 +45,19 @@ public class PaceMan {
         JsonArray ja = JsonParser.parseString(PaceMan.requestData()).getAsJsonArray();
         for (JsonElement run : ja) {
             JsonObject obj = run.getAsJsonObject();
-            String currentRunner = obj.get("user").getAsJsonObject().get("liveAccount").getAsString();
-            if (currentRunner.isEmpty()) {
+            String currentRunner;
+            JsonElement liveAccount = obj.get("user").getAsJsonObject().get("liveAccount");
+            if (!liveAccount.isJsonNull()) {
+                currentRunner = liveAccount.getAsString();
+            } else{
                 currentRunner = obj.get("nickname").getAsString();
-
             }
+
             if (currentRunner.toLowerCase().equals(runnerName)) {
-                Julti.log(Level.DEBUG,"Run from " + runnerName);
+                Julti.log(Level.DEBUG, "Run from " + runnerName);
                 return obj;
             }
-            Julti.log(Level.DEBUG,"no run to track from " + runnerName);
+            Julti.log(Level.DEBUG, "no run to track from " + runnerName);
 
         }
         return null;

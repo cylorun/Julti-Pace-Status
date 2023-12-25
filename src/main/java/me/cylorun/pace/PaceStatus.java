@@ -1,10 +1,11 @@
 package me.cylorun.pace;
 
 import com.google.common.io.Resources;
+import me.cylorun.pace.rpc.DiscordStatus;
+import me.cylorun.pace.ui.PaceStatusGUI;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiAppLaunch;
-import xyz.duncanruns.julti.gui.JultiGUI;
 import xyz.duncanruns.julti.plugin.PluginEvents;
 import xyz.duncanruns.julti.plugin.PluginInitializer;
 import xyz.duncanruns.julti.plugin.PluginManager;
@@ -18,27 +19,27 @@ public class PaceStatus implements PluginInitializer {
     private final String CLIENT_ID = "1188623641513050224";
 
     public static void main(String[] args) throws IOException {
-        JultiAppLaunch.launchWithDevPlugin(args, PluginManager.JultiPluginData.fromString(
-                Resources.toString(Resources.getResource(PaceStatus.class, "/julti.plugin.json"), Charset.defaultCharset())
-        ), new PaceStatus());
+        JultiAppLaunch.launchWithDevPlugin(args, PluginManager.JultiPluginData.fromString(Resources.toString(Resources.getResource(PaceStatus.class, "/julti.plugin.json"), Charset.defaultCharset())), new PaceStatus());
     }
 
     @Override
     public void initialize() {
         Julti.log(Level.INFO, "Pace-Status plugin initialized");
+        PaceStatusOptions options;
         try {
-            PaceStatusOptions.load();
+            options = PaceStatusOptions.load();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        DiscordStatus discord = new DiscordStatus(CLIENT_ID);
-        discord.startup();
+
+        DiscordStatus ds = new DiscordStatus(CLIENT_ID);
+        ds.startup();
+
         AtomicLong timeTracker = new AtomicLong(System.currentTimeMillis());
-        PaceStatusOptions options = PaceStatusOptions.getInstance();
         PluginEvents.RunnableEventType.END_TICK.register(() -> {
             long currentTime = System.currentTimeMillis();
             if (options.enabled && currentTime - timeTracker.get() > 10000) {
-                discord.updatePresence();
+                ds.updatePresence();
                 timeTracker.set(currentTime);
             }
         });
@@ -50,6 +51,8 @@ public class PaceStatus implements PluginInitializer {
 
     @Override
     public void onMenuButtonPress() {
-        new PaceStatusGUI();
+        PaceStatusGUI gui = PaceStatusGUI.open(null);
+        gui.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     }
+
 }
