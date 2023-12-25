@@ -15,6 +15,8 @@ import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class PaceStatus implements PluginInitializer {
+    private final String CLIENT_ID = "1188623641513050224";
+
     public static void main(String[] args) throws IOException {
         JultiAppLaunch.launchWithDevPlugin(args, PluginManager.JultiPluginData.fromString(
                 Resources.toString(Resources.getResource(PaceStatus.class, "/julti.plugin.json"), Charset.defaultCharset())
@@ -24,13 +26,18 @@ public class PaceStatus implements PluginInitializer {
     @Override
     public void initialize() {
         Julti.log(Level.INFO, "Pace-Status plugin initialized");
-        DiscordStatus discord = new DiscordStatus("1188623641513050224");
+        try {
+            PaceStatusOptions.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        DiscordStatus discord = new DiscordStatus(CLIENT_ID);
         discord.startup();
         AtomicLong timeTracker = new AtomicLong(System.currentTimeMillis());
-
+        PaceStatusOptions options = PaceStatusOptions.getInstance();
         PluginEvents.RunnableEventType.END_TICK.register(() -> {
             long currentTime = System.currentTimeMillis();
-            if (currentTime - timeTracker.get() > 5000) {
+            if (options.enabled && currentTime - timeTracker.get() > 10000) {
                 discord.updatePresence();
                 timeTracker.set(currentTime);
             }
@@ -43,6 +50,6 @@ public class PaceStatus implements PluginInitializer {
 
     @Override
     public void onMenuButtonPress() {
-        JOptionPane.showMessageDialog(JultiGUI.getPluginsGUI(), "Holy moly! You pressed the example plugin button!!!", "Jojulti Multi Instance Macro Example Plugin Button.", JOptionPane.INFORMATION_MESSAGE);
+        new PaceStatusGUI();
     }
 }

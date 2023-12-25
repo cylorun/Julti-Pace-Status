@@ -4,11 +4,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.apache.logging.log4j.Level;
+import xyz.duncanruns.julti.Julti;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class PaceMan {
@@ -47,10 +51,10 @@ public class PaceMan {
 
             }
             if (currentRunner.toLowerCase().equals(runnerName)) {
-                System.out.println("Run from " + runnerName);
+                Julti.log(Level.DEBUG,"Run from " + runnerName);
                 return obj;
             }
-            System.out.println("no run to track from " + runnerName);
+            Julti.log(Level.DEBUG,"no run to track from " + runnerName);
 
         }
         return null;
@@ -64,4 +68,29 @@ public class PaceMan {
         return String.format("%d:%02d", minutes, remainingSeconds);
     }
 
+    public static String getIcon(String currentSplit) {
+        Map<String, String> paceIcons = new HashMap<>();
+        paceIcons.put("rsg.enter_nether", "nether");
+        paceIcons.put("rsg.enter_bastion", "bastion");
+        paceIcons.put("rsg.enter_fortress", "fortress");
+        paceIcons.put("rsg.first_portal", "blind");
+        paceIcons.put("rsg.second_portal", "blind");
+        paceIcons.put("rsg.enter_stronghold", "stronghold");
+        paceIcons.put("rsg.enter_end", "end");
+        paceIcons.put("rsg.credits", "finish");
+        return paceIcons.get(currentSplit);
+    }
+
+    public static String getRunDesc(String currentSplit) {
+        Map<String, String> paceDescriptions = new HashMap<>();
+        paceDescriptions.put("rsg.enter_nether", "The Nether");
+        paceDescriptions.put("rsg.enter_bastion", "Bastion");
+        paceDescriptions.put("rsg.enter_fortress", "Fortress");
+        paceDescriptions.put("rsg.first_portal", "First Portal");
+        paceDescriptions.put("rsg.second_portal", "Second Portal");
+        paceDescriptions.put("rsg.enter_stronghold", "Stronghold");
+        paceDescriptions.put("rsg.enter_end", "The End");
+        paceDescriptions.put("rsg.credits", "Finish!");
+        return paceDescriptions.get(currentSplit);
+    }
 }
