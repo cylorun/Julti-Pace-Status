@@ -1,6 +1,6 @@
 {
-  "name": "Discord Pace Status",
-  "id": "pace-status",
+  "name": "Pace Status",
+  "id": "julti-pace-status",
   "version": "${version}",
   "initializer": "me.cylorun.pace.PaceStatus"
 }

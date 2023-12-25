@@ -44,23 +44,24 @@ public class PaceMan {
         }
     }
 
-    public static JsonObject getRun(String runnerName) {
+    public static JsonObject getRun(String searchRunner) {
         String paceData = PaceMan.requestData();
         if (paceData != null) {
             JsonArray ja = JsonParser.parseString(paceData).getAsJsonArray();
-            for (JsonElement run : ja) {
-                JsonObject obj = run.getAsJsonObject();
-                String currentRunner;
-                JsonElement liveAccount = obj.get("user").getAsJsonObject().get("liveAccount");
-                if (!liveAccount.isJsonNull()) {
-                    currentRunner = liveAccount.getAsString();
-                } else {
-                    currentRunner = obj.get("nickname").getAsString();
+            for (JsonElement runElement : ja) {
+                JsonObject run = runElement.getAsJsonObject();
+                String runnerNick = run.get("nickname").getAsString();
+                String runnerTTV = "";
+                try {
+                    runnerTTV = run.get("user").getAsJsonObject().get("liveAccount").getAsString();
+                } catch (UnsupportedOperationException ignored) {
+                    Julti.log(Level.DEBUG, runnerNick+ " does not have a twitch account linked");
                 }
 
-                if (currentRunner.toLowerCase().equals(runnerName)) {
-                    Julti.log(Level.DEBUG, "Run detected from " + runnerName);
-                    return obj;
+//                System.out.println("NICK " + runnerNick + "        TTV : " + runnerTTV+"      LOOKING: "+searchRunner);
+                if (runnerNick.toLowerCase().equals(searchRunner) || runnerTTV.toLowerCase().equals(searchRunner)) {
+                    Julti.log(Level.DEBUG, "Run detected from " + searchRunner);
+                    return run;
                 }
 
             }
