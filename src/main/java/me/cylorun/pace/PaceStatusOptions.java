@@ -16,7 +16,7 @@ public class PaceStatusOptions {
     private static PaceStatusOptions instance;
 
     public String username = "";
-    public boolean enabled = false;
+    public boolean enabled = true;
 
     public static void save() throws IOException {
         PaceStatusOptions.ensurePaceManDir();

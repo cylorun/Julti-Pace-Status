@@ -3,6 +3,7 @@ package me.cylorun.pace;
 import com.google.common.io.Resources;
 import me.cylorun.pace.rpc.DiscordStatus;
 import me.cylorun.pace.ui.PaceStatusGUI;
+import net.arikia.dev.drpc.DiscordRPC;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 import xyz.duncanruns.julti.JultiAppLaunch;
@@ -38,8 +39,9 @@ public class PaceStatus implements PluginInitializer {
         AtomicLong timeTracker = new AtomicLong(System.currentTimeMillis());
         PluginEvents.RunnableEventType.END_TICK.register(() -> {
             long currentTime = System.currentTimeMillis();
-            if (options.enabled && currentTime - timeTracker.get() > 10000) {
-                ds.updatePresence();
+            if (currentTime - timeTracker.get() > 10000) {
+                if (options.enabled) ds.updatePresence();
+                else DiscordRPC.discordClearPresence();
                 timeTracker.set(currentTime);
             }
         });

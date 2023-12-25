@@ -13,7 +13,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class PaceMan {
 
@@ -38,26 +37,33 @@ public class PaceMan {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return Objects.requireNonNull(response).toString();
+        if (response == null){
+            return null;
+        } else {
+            return response.toString();
+        }
     }
 
-    public static JsonObject getCurrentRun(String runnerName) {
-        JsonArray ja = JsonParser.parseString(PaceMan.requestData()).getAsJsonArray();
-        for (JsonElement run : ja) {
-            JsonObject obj = run.getAsJsonObject();
-            String currentRunner;
-            JsonElement liveAccount = obj.get("user").getAsJsonObject().get("liveAccount");
-            if (!liveAccount.isJsonNull()) {
-                currentRunner = liveAccount.getAsString();
-            } else {
-                currentRunner = obj.get("nickname").getAsString();
-            }
+    public static JsonObject getRun(String runnerName) {
+        String paceData = PaceMan.requestData();
+        if (paceData != null) {
+            JsonArray ja = JsonParser.parseString(paceData).getAsJsonArray();
+            for (JsonElement run : ja) {
+                JsonObject obj = run.getAsJsonObject();
+                String currentRunner;
+                JsonElement liveAccount = obj.get("user").getAsJsonObject().get("liveAccount");
+                if (!liveAccount.isJsonNull()) {
+                    currentRunner = liveAccount.getAsString();
+                } else {
+                    currentRunner = obj.get("nickname").getAsString();
+                }
 
-            if (currentRunner.toLowerCase().equals(runnerName)) {
-                Julti.log(Level.DEBUG, "Run detected from " + runnerName);
-                return obj;
-            }
+                if (currentRunner.toLowerCase().equals(runnerName)) {
+                    Julti.log(Level.DEBUG, "Run detected from " + runnerName);
+                    return obj;
+                }
 
+            }
         }
         return null;
     }
