@@ -49,15 +49,14 @@ public class PaceMan {
             JsonElement liveAccount = obj.get("user").getAsJsonObject().get("liveAccount");
             if (!liveAccount.isJsonNull()) {
                 currentRunner = liveAccount.getAsString();
-            } else{
+            } else {
                 currentRunner = obj.get("nickname").getAsString();
             }
 
             if (currentRunner.toLowerCase().equals(runnerName)) {
-                Julti.log(Level.DEBUG, "Run from " + runnerName);
+                Julti.log(Level.DEBUG, "Run detected from " + runnerName);
                 return obj;
             }
-            Julti.log(Level.DEBUG, "no run to track from " + runnerName);
 
         }
         return null;

@@ -51,8 +51,6 @@ public class PaceStatus implements PluginInitializer {
 
     @Override
     public void onMenuButtonPress() {
-        PaceStatusGUI gui = PaceStatusGUI.open(null);
-        gui.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        PaceStatusGUI.open(null);
     }
-
 }

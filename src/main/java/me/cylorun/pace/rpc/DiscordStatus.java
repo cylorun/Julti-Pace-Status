@@ -27,7 +27,7 @@ public class DiscordStatus {
         DiscordRPC.discordUpdatePresence(getNewPresence());
     }
 
-    public DiscordRichPresence getNewPresence() {
+    private DiscordRichPresence getNewPresence() {
         PaceStatusOptions options = PaceStatusOptions.getInstance();
         JsonObject run = PaceMan.getCurrentRun(options.username.toLowerCase());
         if (run != null) {
@@ -35,13 +35,13 @@ public class DiscordStatus {
             JsonObject latestEvent = eventList.get(eventList.size() - 1).getAsJsonObject();
             String currentSplit = latestEvent.get("eventId").getAsString();
             String currentTime = PaceMan.formatTime(Integer.parseInt(latestEvent.get("igt").getAsString()));
-            return new DiscordRichPresence.Builder("Current Time " + currentTime)
+            return new DiscordRichPresence.Builder("Current Time: " + currentTime)
                     .setDetails(PaceMan.getRunDesc(currentSplit))
                     .setBigImage(PaceMan.getIcon(currentSplit), null)
-                    .setSmallImage("app_icon", null)
+                    .setSmallImage("app_icon", "https://paceman.gg")
                     .build();
         }
-        return new DiscordRichPresence.Builder("Not on pace").setBigImage("idle", null).build();
+        return new DiscordRichPresence.Builder("Not on pace").setBigImage("idle", null).setSmallImage("app_icon","https://paceman.gg").build();
     }
 }
 
