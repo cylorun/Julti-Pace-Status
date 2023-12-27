@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class PaceMan {
 
-    public static String requestData() {
+    private static String requestData() {
         String apiUrl = "https://paceman.gg/api/ars/liveruns";
         StringBuilder response = null;
         try {
@@ -55,10 +55,8 @@ public class PaceMan {
                 try {
                     runnerTTV = run.get("user").getAsJsonObject().get("liveAccount").getAsString();
                 } catch (UnsupportedOperationException ignored) {
-                    Julti.log(Level.DEBUG, runnerNick+ " does not have a twitch account linked");
                 }
 
-//                System.out.println("NICK " + runnerNick + "        TTV : " + runnerTTV+"      LOOKING: "+searchRunner);
                 if (runnerNick.toLowerCase().equals(searchRunner) || runnerTTV.toLowerCase().equals(searchRunner)) {
                     Julti.log(Level.DEBUG, "Run detected from " + searchRunner);
                     return run;
