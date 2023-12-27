@@ -51,13 +51,7 @@ public class PaceMan {
             for (JsonElement runElement : ja) {
                 JsonObject run = runElement.getAsJsonObject();
                 String runnerNick = run.get("nickname").getAsString();
-                String runnerTTV = "";
-                try {
-                    runnerTTV = run.get("user").getAsJsonObject().get("liveAccount").getAsString();
-                } catch (UnsupportedOperationException ignored) {
-                }
-
-                if (runnerNick.toLowerCase().equals(searchRunner) || runnerTTV.toLowerCase().equals(searchRunner)) {
+                if (runnerNick.toLowerCase().equals(searchRunner)) {
                     Julti.log(Level.DEBUG, "Run detected from " + searchRunner);
                     return run;
                 }

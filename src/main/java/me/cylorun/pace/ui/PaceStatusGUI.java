@@ -109,9 +109,11 @@ public class PaceStatusGUI extends JFrame {
         enabledCheckBox = new JCheckBox();
         usernameField = new JTextField();
         saveButton = new JButton("save");
+
+        mainPanel.add(new JLabel("Enabled"));
         mainPanel.add(enabledCheckBox);
+        mainPanel.add(new JLabel("MC username"));
         mainPanel.add(usernameField);
         mainPanel.add(saveButton);
-        mainPanel.add(new JLabel("Twitch username"));
     }
 }
