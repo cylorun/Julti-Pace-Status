@@ -10,13 +10,18 @@ import xyz.duncanruns.julti.JultiAppLaunch;
 import xyz.duncanruns.julti.plugin.PluginEvents;
 import xyz.duncanruns.julti.plugin.PluginInitializer;
 import xyz.duncanruns.julti.plugin.PluginManager;
+import xyz.duncanruns.julti.util.ExceptionUtil;
 
 import javax.swing.*;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class PaceStatus implements PluginInitializer {
+    private static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor();
     private final String CLIENT_ID = "1188623641513050224";
 
     public static void main(String[] args) throws IOException {
@@ -36,15 +41,18 @@ public class PaceStatus implements PluginInitializer {
         DiscordStatus ds = new DiscordStatus(CLIENT_ID);
         ds.startup();
 
-        AtomicLong timeTracker = new AtomicLong(System.currentTimeMillis());
-        PluginEvents.RunnableEventType.END_TICK.register(() -> {
-            long currentTime = System.currentTimeMillis();
-            if (currentTime - timeTracker.get() > 10000) {
+        AtomicInteger errorCounter = new AtomicInteger();
+        EXECUTOR.scheduleWithFixedDelay(() -> {
+            try {
                 if (options.enabled) ds.updatePresence();
                 else DiscordRPC.discordClearPresence();
-                timeTracker.set(currentTime);
+                errorCounter.set(0);
+            } catch (Throwable t) {
+                if (errorCounter.incrementAndGet() > 10) {
+                    Julti.log(Level.ERROR, "Pace Status Error: " + ExceptionUtil.toDetailedString(t));
+                }
             }
-        });
+        }, 1, 10, TimeUnit.SECONDS);
 
         PluginEvents.RunnableEventType.STOP.register(() -> {
             Julti.log(Level.INFO, "Pace-Status plugin shutting down...");
