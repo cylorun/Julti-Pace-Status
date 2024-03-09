@@ -10,6 +10,7 @@ import xyz.duncanruns.julti.JultiAppLaunch;
 import xyz.duncanruns.julti.plugin.PluginEvents;
 import xyz.duncanruns.julti.plugin.PluginInitializer;
 import xyz.duncanruns.julti.plugin.PluginManager;
+import xyz.duncanruns.julti.util.ExceptionUtil;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.nio.charset.Charset;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class PaceStatus implements PluginInitializer {
     private static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor();
@@ -39,9 +41,17 @@ public class PaceStatus implements PluginInitializer {
         DiscordStatus ds = new DiscordStatus(CLIENT_ID);
         ds.startup();
 
+        AtomicInteger errorCounter = new AtomicInteger();
         EXECUTOR.scheduleWithFixedDelay(() -> {
-            if (options.enabled) ds.updatePresence();
-            else DiscordRPC.discordClearPresence();
+            try {
+                if (options.enabled) ds.updatePresence();
+                else DiscordRPC.discordClearPresence();
+                errorCounter.set(0);
+            } catch (Throwable t) {
+                if (errorCounter.incrementAndGet() > 10) {
+                    Julti.log(Level.ERROR, "Pace Status Error: " + ExceptionUtil.toDetailedString(t));
+                }
+            }
         }, 1, 10, TimeUnit.SECONDS);
 
         PluginEvents.RunnableEventType.STOP.register(() -> {
