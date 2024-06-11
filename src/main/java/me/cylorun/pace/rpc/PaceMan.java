@@ -4,25 +4,32 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import me.cylorun.pace.PaceStatusOptions;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import xyz.duncanruns.julti.Julti;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
 public class PaceMan {
 
-    private static String requestData() {
-        String apiUrl = "https://paceman.gg/api/ars/liveruns";
+    private static Pair<String, Integer> getURL(URL url) {
         StringBuilder response = null;
+        int code = 400;
         try {
-            URL url = new URL(apiUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
+            code = conn.getResponseCode();
+            if (code != 200) {
+                return Pair.of(null, code);
+            }
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             response = new StringBuilder();
@@ -31,33 +38,67 @@ public class PaceMan {
             while ((line = reader.readLine()) != null) {
                 response.append(line);
             }
+
             reader.close();
-
-
         } catch (Exception e) {
-            e.printStackTrace();
+            Julti.log(Level.ERROR, "(Pace-Status) Failed to fetch run data: " + e.toString());
         }
-        if (response == null){
-            return null;
-        } else {
-            return response.toString();
-        }
+
+        return Pair.of(response == null ? null : response.toString(), code);
     }
 
+
     public static JsonObject getRun(String searchRunner) {
-        String paceData = PaceMan.requestData();
+        String apiUrl = "https://paceman.gg/api/ars/liveruns";
+        String paceData;
+        try {
+            paceData = getURL(new URL(apiUrl)).getLeft();
+        } catch (MalformedURLException | NullPointerException e) {
+            Julti.log(Level.ERROR, "(Pace-Status) Failed to fetch data from paceman");
+            return null;
+        }
+
         if (paceData != null) {
             JsonArray ja = JsonParser.parseString(paceData).getAsJsonArray();
             for (JsonElement runElement : ja) {
                 JsonObject run = runElement.getAsJsonObject();
                 String runnerNick = run.get("nickname").getAsString();
                 if (runnerNick.toLowerCase().equals(searchRunner)) {
-                    Julti.log(Level.DEBUG, "Run detected from " + searchRunner);
                     return run;
                 }
 
             }
         }
+        return null;
+    }
+
+    private static URL getPaceSatsURL() throws MalformedURLException {
+        PaceStatusOptions options = PaceStatusOptions.getInstance();
+        return new URL(String.format("https://paceman.gg/stats/api/getSessionNethers/?name=%s&hours=%s&hoursBetween=2", options.username, options.time_period));
+    }
+
+    public static Pair<Integer, String> getEnterStats(String runnerName) throws IOException {
+        URL url = getPaceSatsURL();
+        Pair<String, Integer> apiRes = getURL(url);
+
+        if (apiRes.getRight() == 404) {
+            Julti.log(Level.WARN, "(Pace-Status) Unknown username " + runnerName);
+            return null;
+        }
+
+        if (apiRes.getLeft() == null) {
+            return null;
+        }
+
+        JsonElement e = JsonParser.parseString(apiRes.getLeft());
+        if (e != null) {
+            JsonObject o = e.getAsJsonObject();
+            int count = o.get("count").getAsInt();
+            String avg = o.get("avg").getAsString();
+
+            return Pair.of(count, avg);
+        }
+
         return null;
     }
 

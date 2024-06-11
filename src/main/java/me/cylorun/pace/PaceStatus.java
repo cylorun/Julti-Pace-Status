@@ -12,17 +12,17 @@ import xyz.duncanruns.julti.plugin.PluginInitializer;
 import xyz.duncanruns.julti.plugin.PluginManager;
 import xyz.duncanruns.julti.util.ExceptionUtil;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PaceStatus implements PluginInitializer {
     private static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor();
-    private final String CLIENT_ID = "1188623641513050224";
+    private static final String CLIENT_ID = "1188623641513050224";
 
     public static void main(String[] args) throws IOException {
         JultiAppLaunch.launchWithDevPlugin(args, PluginManager.JultiPluginData.fromString(Resources.toString(Resources.getResource(PaceStatus.class, "/julti.plugin.json"), Charset.defaultCharset())), new PaceStatus());
@@ -32,20 +32,28 @@ public class PaceStatus implements PluginInitializer {
     public void initialize() {
         Julti.log(Level.INFO, "Pace-Status plugin initialized");
         PaceStatusOptions options;
+        DiscordStatus ds = new DiscordStatus(CLIENT_ID);
+
         try {
             options = PaceStatusOptions.load();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        DiscordStatus ds = new DiscordStatus(CLIENT_ID);
-        ds.startup();
 
         AtomicInteger errorCounter = new AtomicInteger();
+        AtomicBoolean hasInitialized = new AtomicBoolean(false);
         EXECUTOR.scheduleWithFixedDelay(() -> {
+            if (!hasInitialized.get()) {
+                ds.init();
+                hasInitialized.set(true);
+            }
             try {
-                if (options.enabled) ds.updatePresence();
-                else DiscordRPC.discordClearPresence();
+                if (options.enabled) {
+                    ds.updatePresence();
+                } else {
+                    DiscordRPC.discordClearPresence();
+                }
                 errorCounter.set(0);
             } catch (Throwable t) {
                 if (errorCounter.incrementAndGet() > 10) {

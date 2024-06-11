@@ -14,6 +14,8 @@ import java.util.Objects;
 public class PaceStatusGUI extends JFrame {
     private static PaceStatusGUI instance = null;
     private JCheckBox enabledCheckBox;
+    private JCheckBox showEnterCount;
+    private JCheckBox showEnterAvg;
     private JTextField usernameField;
     private JPanel mainPanel;
     private JButton saveButton;
@@ -22,7 +24,7 @@ public class PaceStatusGUI extends JFrame {
     public PaceStatusGUI() {
 
         setUpWindow();
-        this.setTitle("PaceMan Tracker");
+        this.setTitle("Pace Status");
         this.setContentPane(this.mainPanel);
         this.addWindowListener(new WindowAdapter() {
             @Override
@@ -36,9 +38,13 @@ public class PaceStatusGUI extends JFrame {
         this.enabledCheckBox.addActionListener(e -> {
             this.saveButton.setEnabled(this.hasChanges());
             this.usernameField.setEnabled(this.checkBoxEnabled());
-
+            this.showEnterCount.setEnabled(this.checkBoxEnabled());
+            this.showEnterAvg.setEnabled(this.checkBoxEnabled());
         });
+
         this.usernameField.setText(options.username);
+        this.showEnterAvg.setSelected(options.show_enter_avg);
+        this.showEnterCount.setSelected(options.show_enter_count);
         this.usernameField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -47,13 +53,19 @@ public class PaceStatusGUI extends JFrame {
                 }
                 PaceStatusGUI.this.saveButton.setEnabled(PaceStatusGUI.this.hasChanges());
             }
-
         });
+
         this.usernameField.setEnabled(options.enabled);
+        this.showEnterCount.setEnabled(options.enabled);
+
+        this.showEnterAvg.addActionListener(e -> this.saveButton.setEnabled(PaceStatusGUI.this.hasChanges()));
+        this.showEnterCount.addActionListener(e -> this.saveButton.setEnabled(PaceStatusGUI.this.hasChanges()));
+
+        this.showEnterAvg.setEnabled(options.enabled);
         this.saveButton.addActionListener(e -> this.save());
         this.saveButton.setEnabled(this.hasChanges());
         this.revalidate();
-        this.setMinimumSize(new Dimension(300, 140));
+        this.setMinimumSize(new Dimension(300, 200));
         this.pack();
         this.setResizable(false);
         this.setVisible(true);
@@ -73,13 +85,18 @@ public class PaceStatusGUI extends JFrame {
 
     private boolean hasChanges() {
         PaceStatusOptions options = PaceStatusOptions.getInstance();
-        return (this.checkBoxEnabled() != options.enabled) || (!Objects.equals(this.getKeyBoxText(), options.username));
+        return (this.checkBoxEnabled() != options.enabled) ||
+                (!Objects.equals(this.getKeyBoxText(), options.username)) ||
+                (this.showEnterCount.isSelected() != options.show_enter_count) ||
+                (this.showEnterAvg.isSelected() != options.show_enter_avg);
     }
 
     private void save() {
         PaceStatusOptions options = PaceStatusOptions.getInstance();
         options.enabled = this.checkBoxEnabled();
         options.username = this.getKeyBoxText();
+        options.show_enter_count = this.showEnterCount.isSelected();
+        options.show_enter_avg = this.showEnterAvg.isSelected();
         try {
             PaceStatusOptions.save();
         } catch (IOException ex) {
@@ -105,15 +122,64 @@ public class PaceStatusGUI extends JFrame {
     }
 
     private void setUpWindow() {
-        mainPanel = new JPanel();
-        enabledCheckBox = new JCheckBox();
-        usernameField = new JTextField();
-        saveButton = new JButton("save");
+        this.mainPanel = new JPanel(new GridBagLayout());
+        this.enabledCheckBox = new JCheckBox();
+        this.usernameField = new JTextField(15);
+        this.saveButton = new JButton("Save");
+        this.showEnterCount = new JCheckBox();
+        this.showEnterAvg = new JCheckBox();
 
-        mainPanel.add(new JLabel("Enabled"));
-        mainPanel.add(enabledCheckBox);
-        mainPanel.add(new JLabel("MC username"));
-        mainPanel.add(usernameField);
-        mainPanel.add(saveButton);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        this.mainPanel.add(new JLabel("Enabled"), gbc);
+        gbc.gridx = 2;
+        gbc.gridwidth = 1;
+        this.mainPanel.add(this.enabledCheckBox, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 3;
+        this.mainPanel.add(new JSeparator(), gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        this.mainPanel.add(new JLabel("MC Username"), gbc);
+        gbc.gridx = 1;
+        gbc.gridwidth = 2;
+        this.mainPanel.add(this.usernameField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 1;
+        this.mainPanel.add(new JLabel("Show Enter Count"), gbc);
+        gbc.gridx = 1;
+        gbc.gridwidth = 2;
+        this.mainPanel.add(this.showEnterCount, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 1;
+        this.mainPanel.add(new JLabel("Show Enter Avg"), gbc);
+        gbc.gridx = 1;
+        gbc.gridwidth = 2;
+        this.mainPanel.add(this.showEnterAvg, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 3;
+        this.mainPanel.add(new JSeparator(), gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 3;
+        gbc.anchor = GridBagConstraints.SOUTH;
+        gbc.fill = GridBagConstraints.NONE;
+        this.mainPanel.add(this.saveButton, gbc);
     }
 }

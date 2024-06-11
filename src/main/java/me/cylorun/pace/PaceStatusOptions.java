@@ -11,13 +11,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class PaceStatusOptions {
+    public String username = "";
+    public boolean enabled = true;
+    public boolean show_enter_count = true;
+    public boolean show_enter_avg = true;
+    public boolean show_nph = false;
+    public int time_period = 24;
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path SAVE_PATH = Paths.get(System.getProperty("user.home")).resolve(".Julti").resolve("pacestatus_options.json").toAbsolutePath();
     private static PaceStatusOptions instance;
-
-    public String username = "";
-    public boolean enabled = true;
-
     public static void save() throws IOException {
         PaceStatusOptions.ensurePaceManDir();
         FileWriter writer = new FileWriter(SAVE_PATH.toFile());
