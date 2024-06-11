@@ -17,6 +17,7 @@ public class PaceStatusGUI extends JFrame {
     private JCheckBox showEnterCount;
     private JCheckBox showEnterAvg;
     private JTextField usernameField;
+    private JSpinner timePeriodSpinner;
     private JPanel mainPanel;
     private JButton saveButton;
     private boolean closed = false;
@@ -40,6 +41,7 @@ public class PaceStatusGUI extends JFrame {
             this.usernameField.setEnabled(this.checkBoxEnabled());
             this.showEnterCount.setEnabled(this.checkBoxEnabled());
             this.showEnterAvg.setEnabled(this.checkBoxEnabled());
+            this.timePeriodSpinner.setEnabled(this.checkBoxEnabled());
         });
 
         this.usernameField.setText(options.username);
@@ -57,11 +59,13 @@ public class PaceStatusGUI extends JFrame {
 
         this.usernameField.setEnabled(options.enabled);
         this.showEnterCount.setEnabled(options.enabled);
+        this.showEnterAvg.setEnabled(options.enabled);
+        this.timePeriodSpinner.setEnabled(options.enabled);
 
         this.showEnterAvg.addActionListener(e -> this.saveButton.setEnabled(PaceStatusGUI.this.hasChanges()));
         this.showEnterCount.addActionListener(e -> this.saveButton.setEnabled(PaceStatusGUI.this.hasChanges()));
+        this.timePeriodSpinner.addChangeListener(e -> this.saveButton.setEnabled(PaceStatusGUI.this.hasChanges()));
 
-        this.showEnterAvg.setEnabled(options.enabled);
         this.saveButton.addActionListener(e -> this.save());
         this.saveButton.setEnabled(this.hasChanges());
         this.revalidate();
@@ -88,7 +92,8 @@ public class PaceStatusGUI extends JFrame {
         return (this.checkBoxEnabled() != options.enabled) ||
                 (!Objects.equals(this.getKeyBoxText(), options.username)) ||
                 (this.showEnterCount.isSelected() != options.show_enter_count) ||
-                (this.showEnterAvg.isSelected() != options.show_enter_avg);
+                (this.showEnterAvg.isSelected() != options.show_enter_avg) ||
+                ((int) this.timePeriodSpinner.getValue() != options.time_period);
     }
 
     private void save() {
@@ -97,6 +102,7 @@ public class PaceStatusGUI extends JFrame {
         options.username = this.getKeyBoxText();
         options.show_enter_count = this.showEnterCount.isSelected();
         options.show_enter_avg = this.showEnterAvg.isSelected();
+        options.time_period = (int) this.timePeriodSpinner.getValue();
         try {
             PaceStatusOptions.save();
         } catch (IOException ex) {
@@ -128,6 +134,7 @@ public class PaceStatusGUI extends JFrame {
         this.saveButton = new JButton("Save");
         this.showEnterCount = new JCheckBox();
         this.showEnterAvg = new JCheckBox();
+        this.timePeriodSpinner = new JSpinner(new SpinnerNumberModel(PaceStatusOptions.getInstance().time_period, 0, Integer.MAX_VALUE, 1));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -172,11 +179,19 @@ public class PaceStatusGUI extends JFrame {
 
         gbc.gridx = 0;
         gbc.gridy = 5;
+        gbc.gridwidth = 1;
+        this.mainPanel.add(new JLabel("Time Period (hours)"), gbc);
+        gbc.gridx = 1;
+        gbc.gridwidth = 2;
+        this.mainPanel.add(this.timePeriodSpinner, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 6;
         gbc.gridwidth = 3;
         this.mainPanel.add(new JSeparator(), gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 6;
+        gbc.gridy = 7;
         gbc.gridwidth = 3;
         gbc.anchor = GridBagConstraints.SOUTH;
         gbc.fill = GridBagConstraints.NONE;
