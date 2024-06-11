@@ -50,8 +50,8 @@ public class DiscordStatus {
         }
 
         String enterString = options.show_enter_count ? String.format("Enters: %s", stats.getLeft()) : "";
-        String enterAvgString = options.show_enter_avg ? String.format("Enter Average: %s", stats.getRight()) : "";
-        return String.format("%s\n%s", enterString, enterAvgString);
+        String enterAvgString = options.show_enter_avg ? String.format("Enter Avg: %s", stats.getRight()) : "";
+        return String.format("%s %s %s", enterString, enterString.isEmpty() || enterAvgString.isEmpty() ? "" : " | ", enterAvgString);
     }
 
     public Pair<Integer, String> getStats() throws IOException {
@@ -86,7 +86,7 @@ public class DiscordStatus {
 
         Pair<Integer, String> stats = this.getStats();
         String enters = stats.getLeft() == null || !options.show_enter_avg ? "" : String.format("Enters: %s", stats.getLeft());
-        String avg = stats.getRight() == null || !options.show_enter_avg ? "" : String.format("Enter Average: %s", stats.getRight());
+        String avg = stats.getRight() == null || !options.show_enter_avg ? "" : String.format("Enter Avg: %s", stats.getRight());
 
         return new DiscordRichPresence.Builder(avg)
                 .setStartTimestamps(this.start)
