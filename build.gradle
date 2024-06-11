@@ -21,7 +21,7 @@ configurations {
 }
 
 dependencies {
-    implementation 'com.github.DuncanRuns:Julti:v1.0.2'
+    implementation 'com.github.DuncanRuns:Julti:v1.4.5'
     provided 'com.github.Vatuu:discord-rpc:1.6.2'
 }
 
