@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 
 public class PaceStatusOptions {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path SAVE_PATH = Paths.get(System.getProperty("user.home")).resolve(".PaceMan").resolve("discord_options.json").toAbsolutePath();
+    private static final Path SAVE_PATH = Paths.get(System.getProperty("user.home")).resolve(".Julti").resolve("pacestatus_options.json").toAbsolutePath();
     private static PaceStatusOptions instance;
 
     public String username = "";
