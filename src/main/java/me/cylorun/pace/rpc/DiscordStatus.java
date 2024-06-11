@@ -34,6 +34,7 @@ public class DiscordStatus {
     public void updatePresence() throws IOException {
         DiscordRichPresence p = this.getNewPresence();
         if (p == null) {
+            DiscordRPC.discordClearPresence();
             return;
         }
         DiscordRPC.discordUpdatePresence(p);
@@ -74,7 +75,7 @@ public class DiscordStatus {
             JsonObject latestEvent = eventList.get(eventList.size() - 1).getAsJsonObject();
             String currentSplit = latestEvent.get("eventId").getAsString();
             String currentTime = PaceMan.formatTime(Integer.parseInt(latestEvent.get("igt").getAsString()));
-            Pair<String, String> text = getText(currentSplit);
+            Pair<String, String> text = this.getText(currentSplit);
 
             return new DiscordRichPresence.Builder("Current Time: " + currentTime)
                     .setStartTimestamps(this.start)
@@ -85,6 +86,9 @@ public class DiscordStatus {
         }
 
         Pair<Integer, String> stats = this.getStats();
+        if (stats == null) {
+            return null;
+        }
         String enters = stats.getLeft() == null || !options.show_enter_avg ? "" : String.format("Enters: %s", stats.getLeft());
         String avg = stats.getRight() == null || !options.show_enter_avg ? "" : String.format("Enter Avg: %s", stats.getRight());
 
