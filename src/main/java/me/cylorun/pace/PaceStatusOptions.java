@@ -16,6 +16,10 @@ public class PaceStatusOptions {
     public boolean show_enter_count = true;
     public boolean show_enter_avg = true;
     public int time_period = 24;
+    public int auto_deafen_hotkey = 155;
+    public boolean auto_deafen = false;
+    public String auto_deafen_split = "rsg.first_portal";
+    public int auto_deafen_time = 7; // mins
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path SAVE_PATH = Paths.get(System.getProperty("user.home")).resolve(".Julti").resolve("pacestatus_options.json").toAbsolutePath();
     private static PaceStatusOptions instance;
