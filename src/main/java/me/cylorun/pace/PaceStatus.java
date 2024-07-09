@@ -67,7 +67,7 @@ public class PaceStatus implements PluginInitializer {
     }
 
     public static boolean isAfk() {
-        return (System.currentTimeMillis() - PaceStatus.lastResetTime) > (1000 * 10); // 5 minutes
+        return (System.currentTimeMillis() - PaceStatus.lastResetTime) > (1000 * 300); // 5 minutes
     }
 
     @Override
