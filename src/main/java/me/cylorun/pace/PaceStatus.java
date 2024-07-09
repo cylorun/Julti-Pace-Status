@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PaceStatus implements PluginInitializer {
     private static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor();
     private static final String CLIENT_ID = "1188623641513050224";
+    private static long lastResetTime = System.currentTimeMillis();
 
     public static void main(String[] args) throws IOException {
         JultiAppLaunch.launchWithDevPlugin(args, PluginManager.JultiPluginData.fromString(Resources.toString(Resources.getResource(PaceStatus.class, "/julti.plugin.json"), Charset.defaultCharset())), new PaceStatus());
@@ -62,9 +63,11 @@ public class PaceStatus implements PluginInitializer {
             }
         }, 1, 10, TimeUnit.SECONDS);
 
-        PluginEvents.RunnableEventType.STOP.register(() -> {
-            Julti.log(Level.INFO, "Pace-Status plugin shutting down...");
-        });
+        PluginEvents.InstanceEventType.RESET.register(mcInstance -> lastResetTime = System.currentTimeMillis());
+    }
+
+    public static boolean isAfk() {
+        return (System.currentTimeMillis() - PaceStatus.lastResetTime) > (1000 * 10); // 5 minutes
     }
 
     @Override

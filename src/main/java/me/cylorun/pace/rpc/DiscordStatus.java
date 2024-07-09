@@ -3,6 +3,7 @@ package me.cylorun.pace.rpc;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import me.cylorun.pace.PaceStatus;
 import me.cylorun.pace.PaceStatusOptions;
 import net.arikia.dev.drpc.DiscordEventHandlers;
 import net.arikia.dev.drpc.DiscordRPC;
@@ -59,7 +60,7 @@ public class DiscordStatus {
         return PaceMan.getEnterStats(PaceStatusOptions.getInstance().username);
     }
 
-    private Pair<String, String> getText(String currentSplit) throws IOException {
+    private Pair<String, String> getDiscordText(String currentSplit) throws IOException {
         String stats = getStatsString();
         if (currentSplit == null) {
             return Pair.of("Idle", stats);
@@ -70,12 +71,13 @@ public class DiscordStatus {
     private DiscordRichPresence getNewPresence() throws IOException {
         PaceStatusOptions options = PaceStatusOptions.getInstance();
         JsonObject run = PaceMan.getRun(options.username.toLowerCase());
+
         if (run != null) {
             JsonArray eventList = run.getAsJsonArray("eventList");
             JsonObject latestEvent = eventList.get(eventList.size() - 1).getAsJsonObject();
             String currentSplit = latestEvent.get("eventId").getAsString();
             String currentTime = PaceMan.formatTime(Integer.parseInt(latestEvent.get("igt").getAsString()));
-            Pair<String, String> text = this.getText(currentSplit);
+            Pair<String, String> text = this.getDiscordText(currentSplit);
 
             return new DiscordRichPresence.Builder("Current Time: " + currentTime)
                     .setStartTimestamps(this.start)
@@ -85,12 +87,23 @@ public class DiscordStatus {
                     .build();
         }
 
+
         Pair<Integer, String> stats = this.getStats();
         if (stats == null) {
             return null;
         }
+
         String enters = stats.getLeft() == null || !options.show_enter_avg ? "" : String.format("Enters: %s", stats.getLeft());
         String avg = stats.getRight() == null || !options.show_enter_avg ? "" : String.format("Enter Avg: %s", stats.getRight());
+
+        if (PaceStatus.isAfk()) {
+            return new DiscordRichPresence.Builder("Currently AFK")
+                    .setStartTimestamps(this.start)
+                    .setDetails(getStatsString())
+                    .setBigImage("idle", "Not on pace")
+                    .setSmallImage("app_icon", "paceman.gg")
+                    .build();
+        }
 
         return new DiscordRichPresence.Builder(avg)
                 .setStartTimestamps(this.start)
